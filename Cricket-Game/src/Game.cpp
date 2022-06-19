@@ -135,3 +135,196 @@ cout<<"Team B:"<<endl;
 		cout<<"				["<<i+1<<"]  "<<teamB.player_vector[i].playername<<endl;
 	}
 }
+void Game::Toss(){
+	cin.ignore();
+	cout<<"Press Enter for Toss A coin "<<endl;
+	cin.get();
+	int toss;
+	srand(time(NULL));
+	toss = rand() % 2;
+	if(toss==0){
+		cout<<"Team A Won The Toss "<<endl<<endl;
+		TossChoice(teamA);
+	}
+	if(toss==1){
+		cout<<"Team B Won The Toss"<<endl<<endl;
+		TossChoice(teamB);
+	}
+}
+
+void Game::TossChoice(Team TossWinnerTeam){
+	cout<<"Press 1 for Bat or 2 for Ball "<<endl;
+	cout<<"1. Bat"<<endl;
+	cout<<"2. Ball"<<endl;
+	int tossInput = getNum();
+	switch(tossInput){
+	case 1:
+		cout<<TossWinnerTeam.name<<" Won The Toss And Choose To bat"<<endl;
+		if(TossWinnerTeam.name.compare("Team-A")==0){
+			battingTeam=&teamA;
+			bowlingTeam=&teamB;
+		}
+		else{
+			bowlingTeam=&teamA;
+			battingTeam=&teamB;
+		}
+		break;
+	case 2:
+		cout<<TossWinnerTeam.name<<" Won The Toss And Choose To ball"<<endl;
+		if(TossWinnerTeam.name.compare("Team-A")==0){
+					bowlingTeam=&teamA;
+					battingTeam=&teamB;
+				}
+				else{
+					battingTeam=&teamA;
+					bowlingTeam=&teamB;
+				}
+		break;
+	default:
+		cout<<"Please Enter A valid Input !";
+		TossChoice(TossWinnerTeam);
+		break;
+	}
+}
+
+void Game::startFirstInnings(){
+	cout<<"\n        ||| FIRST INNINGS STARTS  |||\n";
+	isFirstInning = true;
+	cout<<"\n\n";
+	instilizePlayer();
+}
+void Game::instilizePlayer(){
+	batsman = &battingTeam->player_vector[0];
+	bowler = &bowlingTeam->player_vector[0];
+	cout<<"\n"<<battingTeam->name<<" - "<<batsman->playername<<" is batting"<<endl;
+	cout<<bowlingTeam->name<<" - "<<bowler->playername<<" is bowling"<<endl;
+}
+void Game::playInnings(){
+	for(int i =0 ; i <maxBalls;i++){
+		cin.get();
+		cout<<"Press Enter To Bowling";
+		cin.get();
+		cout<<"\n Bowling....."<<endl;
+		bat();
+		if(!validateInningScore()){
+			break;
+		}
+	}
+}
+
+void Game::bat(){
+	srand(time(NULL));
+	int runscoredd = rand() % 7;
+	batsman->runScored = batsman->runScored + runscoredd;
+	batsman->ballsPlayed = batsman->ballsPlayed +1;
+	battingTeam->totalRunsScored = battingTeam->totalRunsScored + runscoredd;
+
+
+	bowlingTeam->totalBallsBowled = bowlingTeam->totalBallsBowled +1;
+	bowler->runsGiven = bowler->runsGiven + runscoredd;
+	bowler->ballsBowled = bowler->ballsBowled + 1;
+	showGameCard();
+	if(runscoredd!=0){
+	cout<<endl<<bowler->playername<<" To "<<batsman->playername<<" "<<runscoredd<<"   Runs!"<<endl<<endl;
+	}
+	else{
+		cout<<endl<<bowler->playername<<" To "<<batsman->playername<<" "<<"   OUT!"<<endl<<endl;
+		bowler->wicketsTaken =bowler-> wicketsTaken + 1;
+		battingTeam->wicketLost = battingTeam->wicketLost +1;
+		int nextplayerindex = battingTeam->wicketLost;
+		batsman = &battingTeam->player_vector[nextplayerindex];
+		showGameCard();
+	}
+}
+
+bool Game::validateInningScore(){
+	if(isFirstInning){
+		if(battingTeam->wicketLost==playerPerTeam || bowlingTeam->totalBallsBowled==maxBalls){
+			cout<<"\n";
+			cout<<"              ||| END OF FIRST INNINGS "<<endl;
+			cout<<"        "<<battingTeam->name<<" Scored Against "<<bowlingTeam->name<<" At a Lose of ";
+			cout<<battingTeam->wicketLost<<" Wickets In "<<bowlingTeam->totalBallsBowled<<" Balls"<<endl;
+
+			cout<<"        "<<bowlingTeam->name<<" Needs to Score "<<battingTeam->totalRunsScored+1<<" To Win!!";
+			cout<<"\n\n\n\n               ||| START OF SECONG INNING \n";
+			return false;
+		}
+	}
+
+		else{
+
+		}
+		return true;
+}
+
+void Game::showGameCard(){
+	cout<<"\n\n------------------------------------------------------------------------------------------------\n\n";
+	cout<<"  "<<battingTeam->name<<"  "<<battingTeam->totalRunsScored<<"  - "<<battingTeam->wicketLost;
+	cout<<" ("<<bowlingTeam->totalBallsBowled<<") | "<<batsman->playername<<" "<<batsman->runScored<<" ("<<batsman->ballsPlayed<<")";
+	cout<<"        "<<bowler->playername<<" "<<bowler->ballsBowled<<" - "<<bowler->runsGiven<<" - "<<bowler->wicketsTaken;
+	cout<<"\n\n------------------------------------------------------------------------------------------------\n\n";
+}
+
+void Game::startSecondInning(){
+	swap();
+	instilizePlayer();
+	isFirstInning = false;
+	playInnings();
+	gameEnd();
+	result();
+	showResultCard();
+
+}
+void Game::swap(){
+	if(battingTeam->name.compare("Team-A")==0){
+		battingTeam = &teamB;
+		bowlingTeam = &teamA;
+	}
+	else if(battingTeam->name.compare("Team-B")==0){
+		battingTeam = &teamA;
+		bowlingTeam = &teamB;
+	}
+	else if(bowlingTeam->name.compare("Team-B")==0){
+		battingTeam = &teamB;
+		bowlingTeam = &teamA;
+	}
+	else{
+		battingTeam = &teamA;
+		bowlingTeam = &teamB;
+	}
+}
+
+void Game::gameEnd(){
+	cout<<"                      ||| END OF 2ND INNING |||"<<endl<<endl;
+}
+void Game::result(){
+
+	if(bowlingTeam->totalRunsScored>battingTeam->totalRunsScored){
+		cout<<bowlingTeam->name<<" WON THE MATCH"<<endl;
+	}
+	else if(battingTeam->totalRunsScored>bowlingTeam->totalRunsScored){
+		cout<<battingTeam->name<<" WON THE MATCH"<<endl;
+	}
+	else{
+		cout<<"IT'S A DRAW"<<endl;
+	}
+	cout<<"                   |||  MATCH ENDS |||"<<endl<<endl;
+}
+void Game::showResultCard(){
+	cout<<battingTeam->name<<" "<<battingTeam->totalRunsScored<<" - "<<battingTeam->wicketLost<<"  ("<<bowlingTeam->totalBallsBowled<<")"<<endl;
+	cout<<"==================================================="<<endl;
+	cout<<"|  PLAYER            BATTING        BOWLING"<<endl;
+	for(int i = 0 ; i <playerPerTeam ; i++){
+		cout<<"|  ["<<i<<"] "<<battingTeam->player_vector[i].playername<<"      "<<"  "<<battingTeam->player_vector[i].runScored<<"("<<battingTeam->player_vector[i].ballsPlayed<<")         ";
+		cout<<battingTeam->player_vector[i].ballsBowled<<"-"<<battingTeam->player_vector[i].runsGiven<<"-"<<battingTeam->player_vector[i].wicketsTaken<<"        |"<<endl;
+	}
+	cout<<"==================================================="<<endl;
+	cout<<bowlingTeam->name<<" "<<bowlingTeam->totalRunsScored<<" - "<<bowlingTeam->wicketLost<<"  ("<<battingTeam->totalBallsBowled<<")"<<endl;
+		cout<<"==================================================="<<endl;
+		cout<<"|  PLAYER            BATTING        BOWLING"<<endl;
+		for(int i = 0 ; i <playerPerTeam ; i++){
+			cout<<"|  ["<<i<<"] "<<bowlingTeam->player_vector[i].playername<<"      "<<"  "<<bowlingTeam->player_vector[i].runScored<<"("<<bowlingTeam->player_vector[i].ballsPlayed<<")         ";
+			cout<<bowlingTeam->player_vector[i].ballsBowled<<"-"<<bowlingTeam->player_vector[i].runsGiven<<"-"<<bowlingTeam->player_vector[i].wicketsTaken<<"        |"<<endl;
+		}
+	cout<<"==================================================="<<endl;
+}
